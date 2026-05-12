@@ -18,17 +18,30 @@ This repo is intended as the TypeScript-first version of the original OpenAI cus
 
 ## How to use
 
-### Setting your OpenAI API key
+### Setting your API credentials
 
-You can set your OpenAI API key in your environment variables by running the following command in your terminal:
+For Azure OpenAI (recommended for this setup), set:
 
 ```bash
-export OPENAI_API_KEY=your_api_key
+export AZURE_OPENAI_API_KEY=your_azure_openai_api_key
+export AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com
+export AZURE_OPENAI_DEPLOYMENT=your_model_deployment_name
 ```
 
-You can also follow [these instructions](https://platform.openai.com/docs/libraries#create-and-export-an-api-key) to set your OpenAI key at a global level.
+Optional (only if your Azure resource needs it):
 
-Alternatively, you can set the `OPENAI_API_KEY` environment variable in an `.env` file at the root of the `typescript-backend` folder.
+```bash
+export AZURE_OPENAI_API_VERSION=2024-10-21
+```
+
+You can still use plain OpenAI by setting:
+
+```bash
+export OPENAI_API_KEY=your_openai_api_key
+export OPENAI_MODEL=gpt-5.2
+```
+
+Alternatively, set the same variables in an `.env` file at the root of the `typescript-backend` folder.
 
 ### Install dependencies
 

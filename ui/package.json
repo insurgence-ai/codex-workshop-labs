@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:next": "npx next dev",
+    "dev:next": "next dev --port 3000",
     "dev:server": "cd ../typescript-backend && npm run dev",
     "dev": "concurrently \"npm run dev:next\" \"npm run dev:server\"",
     "build": "next build",

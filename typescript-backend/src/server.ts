@@ -96,6 +96,19 @@ function extractThreadId(queryThreadId: unknown, body: unknown): string {
   return String(lastActiveThreadId ?? "");
 }
 
+function extractPreferredAgentName(body: unknown): AgentName | null {
+  const b = body as any;
+  const candidate = String(
+    b?.preferred_agent ??
+      b?.preferredAgent ??
+      b?.params?.preferred_agent ??
+      b?.params?.preferredAgent ??
+      ""
+  );
+  if (!candidate) return null;
+  return candidate in agentMap ? (candidate as AgentName) : null;
+}
+
 function maybeHydrateForHandoff(state: ThreadState, target: string) {
   if (target === "Seat and Special Services Agent" || target === "Booking and Cancellation Agent") {
     if (!state.context.confirmation_number) state.context.confirmation_number = `CNF-${Math.floor(Math.random() * 900000 + 100000)}`;
@@ -131,6 +144,10 @@ app.get("/chatkit/state/stream", (req, res) => {
 app.post("/chatkit", async (req, res) => {
   const resolvedThreadId = extractThreadId(req.query.thread_id, req.body);
   const state = ensureThread(resolvedThreadId);
+  const preferredAgent = extractPreferredAgentName(req.body);
+  if (preferredAgent) {
+    state.current_agent = preferredAgent;
+  }
   lastActiveThreadId = state.thread_id;
   const beforeContext = publicContext(state.context);
   const startEventIndex = state.events.length;

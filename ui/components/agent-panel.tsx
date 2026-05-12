@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Bot } from "lucide-react";
 import type { Agent, AgentEvent, GuardrailCheck } from "@/lib/types";
 import { AgentsList } from "./agents-list";
@@ -13,6 +14,8 @@ interface AgentPanelProps {
   events: AgentEvent[];
   guardrails: GuardrailCheck[];
   context: Record<string, any>;
+  selectedAgentName: string | null;
+  onSelectAgent: (agentName: string) => void;
 }
 
 export function AgentPanel({
@@ -21,11 +24,22 @@ export function AgentPanel({
   events,
   guardrails,
   context,
+  selectedAgentName,
+  onSelectAgent,
 }: AgentPanelProps) {
-  const activeAgent = agents.find((a) => a.name === currentAgent);
-  const runnerEvents = events.filter(
-    (e) => e.type !== "message" && e.type !== "progress_update"
-  );
+  const selectedAgent = useMemo(() => {
+    if (selectedAgentName) {
+      const match = agents.find((a) => a.name === selectedAgentName);
+      if (match) return match;
+    }
+    return agents.find((a) => a.name === currentAgent) ?? agents[0] ?? null;
+  }, [agents, currentAgent, selectedAgentName]);
+
+  const runnerEvents = events.filter((e) => {
+    if (e.type === "message" || e.type === "progress_update") return false;
+    if (!selectedAgent?.name) return true;
+    return e.agent === selectedAgent.name;
+  });
 
   return (
     <div className="w-3/5 h-full flex flex-col border-r border-gray-200 bg-white rounded-xl shadow-sm">
@@ -40,11 +54,15 @@ export function AgentPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-        <AgentsList agents={agents} currentAgent={currentAgent} />
+        <AgentsList
+          agents={agents}
+          activeAgent={selectedAgent?.name ?? null}
+          onSelectAgent={onSelectAgent}
+        />
         <ConversationContext context={context} />
         <Guardrails
           guardrails={guardrails}
-          inputGuardrails={activeAgent?.input_guardrails ?? []}
+          inputGuardrails={selectedAgent?.input_guardrails ?? []}
         />
         <RunnerOutput runnerEvents={runnerEvents} />
       </div>

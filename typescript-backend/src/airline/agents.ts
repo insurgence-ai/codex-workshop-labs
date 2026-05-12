@@ -1,9 +1,10 @@
+import "../openai-client.js";
 import { Agent } from "@openai/agents";
 import { RECOMMENDED_PROMPT_PREFIX } from "@openai/agents-core/extensions";
 import { jailbreakGuardrail, relevanceGuardrail } from "./guardrails.js";
 import { assignSpecialServiceSeat, bookNewFlight, cancelFlight, displaySeatMap, faqLookupTool, flightStatusTool, getMatchingFlights, getTripDetails, issueCompensation, updateSeat } from "./tools.js";
 
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-5.2";
+const MODEL = process.env.AZURE_OPENAI_DEPLOYMENT ?? process.env.OPENAI_MODEL ?? "gpt-5.2";
 
 export const seatSpecialServicesAgent = new Agent({
   name: "Seat and Special Services Agent",
@@ -15,7 +16,7 @@ You are the Seat & Special Services Agent. Handle seat changes and medical/speci
 2. Offer seat map or specific seat. Use assign_special_service_seat for front row/medical requests, update_seat for standard changes, display_seat_map for visual choice.
 3. Confirm new seat is saved on confirmation.
 Important: if request is clear and data is present, perform multiple tool calls in a single turn without waiting.
-When done, emit at most one handoff: Refunds & Compensation if disruption support is pending, otherwise Triage.
+When done, emit at most one hand off: Refunds & Compensation if disruption support is pending, otherwise Triage.
 If unrelated to seats/special services, transfer to Triage.`,
   tools: [updateSeat, assignSpecialServiceSeat, displaySeatMap],
   inputGuardrails: [relevanceGuardrail, jailbreakGuardrail]

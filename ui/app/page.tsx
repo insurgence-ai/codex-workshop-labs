@@ -19,6 +19,7 @@ export default function Home() {
   >("idle");
   const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null);
   const [chatkitError, setChatkitError] = useState<string | null>(null);
+  const [selectedAgentName, setSelectedAgentName] = useState<string | null>(null);
 
   const normalizeEvents = useCallback((items: AgentEvent[]) => {
     if (!items.length) return items;
@@ -69,6 +70,12 @@ export default function Home() {
       void hydrateState(threadId);
     }
   }, [threadId, hydrateState]);
+
+  useEffect(() => {
+    if (!selectedAgentName && currentAgent) {
+      setSelectedAgentName(currentAgent);
+    }
+  }, [currentAgent, selectedAgentName]);
 
   useEffect(() => {
     if (!threadId) return;
@@ -177,6 +184,10 @@ export default function Home() {
     void hydrateState(threadId);
   }, [hydrateState, threadId]);
 
+  const handleSelectAgent = useCallback((agentName: string) => {
+    setSelectedAgentName(agentName);
+  }, []);
+
   return (
     <main className="flex h-screen gap-2 bg-gray-100 p-2">
       <div className="fixed bottom-2 left-2 z-50 rounded bg-black/80 px-3 py-2 text-xs text-white">
@@ -192,9 +203,12 @@ export default function Home() {
         events={events}
         guardrails={guardrails}
         context={context}
+        selectedAgentName={selectedAgentName}
+        onSelectAgent={handleSelectAgent}
       />
       <ChatKitPanel
         initialThreadId={initialThreadId}
+        selectedAgentName={selectedAgentName}
         onThreadChange={handleThreadChange}
         onResponseEnd={handleResponseEnd}
         onRunnerUpdate={handleResponseEnd}
